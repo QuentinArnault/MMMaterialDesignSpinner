@@ -33,6 +33,9 @@ FOUNDATION_EXPORT const unsigned char MMMaterialDesignSpinnerVersionString[];
 /** Property indicating whether the view is currently animating. */
 @property (nonatomic, readonly) BOOL isAnimating;
 
+/** Sets the tint colors of the spinner. */
+@property (nonatomic, strong) NSArray *tintColors;
+
 /**
  *  Convenience function for starting & stopping animation with a boolean variable instead of explicit
  *  method calls.

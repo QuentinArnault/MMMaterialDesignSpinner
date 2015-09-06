@@ -14,6 +14,7 @@ static NSString *kMMRingRotationAnimationKey = @"mmmaterialdesignspinner.rotatio
 @interface MMMaterialDesignSpinner ()
 @property (nonatomic, readonly) CAShapeLayer *progressLayer;
 @property (nonatomic, readwrite) BOOL isAnimating;
+@property (nonatomic, assign) NSUInteger currentColorIndex;
 @end
 
 @implementation MMMaterialDesignSpinner
@@ -122,6 +123,30 @@ static NSString *kMMRingRotationAnimationKey = @"mmmaterialdesignspinner.rotatio
     animations.repeatCount = INFINITY;
     [self.progressLayer addAnimation:animations forKey:kMMRingStrokeAnimationKey];
     
+    void (^ccblock)(void);
+    
+    __weak __block dispatch_block_t weakBlock;
+    ccblock = ^
+    {
+        dispatch_block_t strongBlock = weakBlock;
+        dispatch_time_t next = dispatch_time(DISPATCH_TIME_NOW, (int64_t)(1.5f * NSEC_PER_SEC));
+        
+        if (self.tintColors.count > 0) {
+            ++self.currentColorIndex;
+            if (self.currentColorIndex >= self.tintColors.count) {
+                self.currentColorIndex = 0;
+            }
+            
+            self.tintColor = [self.tintColors objectAtIndex:self.currentColorIndex];
+        }
+        
+        dispatch_after(next
+                       , dispatch_get_main_queue(), strongBlock);
+    };
+    
+    weakBlock = ccblock;
+    
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(1.5f * NSEC_PER_SEC)), dispatch_get_main_queue(), ccblock);
     
     self.isAnimating = true;
     
@@ -185,6 +210,14 @@ static NSString *kMMRingRotationAnimationKey = @"mmmaterialdesignspinner.rotatio
 - (void)setHidesWhenStopped:(BOOL)hidesWhenStopped {
     _hidesWhenStopped = hidesWhenStopped;
     self.hidden = !self.isAnimating && hidesWhenStopped;
+}
+
+- (void)setTintColors:(NSArray *)tintColors {
+    _tintColors = tintColors;
+    
+    if (tintColors.count > 0) {
+        self.tintColor = [self.tintColors objectAtIndex:0];
+    }
 }
 
 @end
